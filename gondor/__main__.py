@@ -279,6 +279,14 @@ def cmd_deploy(args, env, config):
                 commit = sha
             tar_path = os.path.abspath(os.path.join(env["repo_root"], "{}-{}.tar".format(label, sha)))
             cmd = [git, "archive", "--format=tar", commit, "-o", tar_path]
+            if os.path.isfile('.gitmodules'):
+                try:
+                    git_archive_all = utils.find_command("git-archive-all")
+                    cmd = [git_archive_all, "--prefix=/", tar_path]
+                except utils.BadCommand as e:
+                    warn("You appear to have git submodules in your repository, ")
+                    out("but do not have git-archive-all installed. ")
+                    out("Submodules will not be include in this deploy.\n")
         elif config["gondor.vcs"] == "hg":
             try:
                 hg = utils.find_command("hg")
